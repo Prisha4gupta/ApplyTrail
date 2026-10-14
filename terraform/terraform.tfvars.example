@@ -1,0 +1,9 @@
+region = "ap-south-1"
+name = "applytrail"
+kubernetes_version = "1.35"
+admin_principal_arn = "arn:aws:iam::REPLACE_ACCOUNT:role/REPLACE_OPERATOR_ROLE"
+github_repository = "Prisha4gupta/ApplyTrail"
+api_allowed_cidrs = ["REPLACE_OPERATOR_PUBLIC_IP/32", "REPLACE_FIXED_CI_EGRESS/32"]
+# For GitHub-hosted runners without fixed egress, explicitly review 0.0.0.0/0.
+# Existing provider? Set github_oidc_provider_arn to avoid duplicate creation.
+# After planning, pin exact resolved addon builds in addon_versions.
