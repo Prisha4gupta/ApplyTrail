@@ -1,0 +1,30 @@
+grafana:
+  service: {type: ClusterIP}
+  ingress: {enabled: false}
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: monitoring
+  resources:
+    requests: {cpu: 100m, memory: 128Mi}
+    limits: {memory: 256Mi}
+prometheus:
+  prometheusSpec:
+    retention: 6h
+    serviceMonitorSelector:
+      matchLabels: {release: monitoring}
+    serviceMonitorNamespaceSelector: {}
+    resources:
+      requests: {cpu: 200m, memory: 512Mi}
+      limits: {memory: 1Gi}
+alertmanager:
+  enabled: false
+# EKS does not expose these control-plane endpoints to this stack.
+kubeControllerManager: {enabled: false}
+kubeScheduler: {enabled: false}
+kubeEtcd: {enabled: false}
+kubeProxy: {enabled: false}

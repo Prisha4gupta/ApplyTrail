@@ -1,0 +1,117 @@
+name: Verify and deliver ApplyTrail
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: applytrail-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17.6-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test-only-isolated
+          POSTGRES_DB: applytrail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U test -d applytrail_test"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql+psycopg://test:test-only-isolated@localhost:5432/applytrail_test
+      TEST_DATABASE_URL: postgresql+psycopg://test:test-only-isolated@localhost:5432/applytrail_test
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24.15.0', cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: pip install -r backend/requirements.txt
+      - name: Migrate and test PostgreSQL
+        working-directory: backend
+        run: |
+          alembic upgrade head
+          pytest -v --junitxml=pytest-results.xml
+          alembic check
+      - run: npm ci && npm run build
+        working-directory: frontend
+      - name: Retain test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: pytest-results, path: backend/pytest-results.xml}
+  images:
+    needs: verify
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Build once
+        env:
+          COMPONENT: ${{ matrix.component }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          image="ghcr.io/${REPOSITORY,,}-${COMPONENT}:${GITHUB_SHA}"
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+          docker build --build-arg APP_VERSION="$GITHUB_SHA" -t "$image" "./$COMPONENT"
+      - name: Scan the exact local image
+        run: |
+          mkdir -p scan
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD/scan:/reports" \
+            aquasec/trivy:0.75.0 image --severity HIGH,CRITICAL --exit-code 1 \
+            --format json --output /reports/trivy.json "$IMAGE"
+      - name: Preserve scan report even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: trivy-${{ matrix.component }}
+          path: scan/
+      - name: Push scanned image
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker push "$IMAGE"
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: images
+    runs-on: ubuntu-24.04
+    environment: demo
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c
+        with:
+          role-to-assume: ${{ vars.ff717079ee2060e4bcee96c4779b553acc87447c_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.ff717079ee2060e4bcee96c4779b553acc87447c_REGION }}
+      - name: Install pinned Helm
+        run: |
+          curl -fsSLO https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz
+          curl -fsSLO https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz.sha256sum
+          sha256sum -c helm-v3.19.0-linux-amd64.tar.gz.sha256sum
+          tar -xzf helm-v3.19.0-linux-amd64.tar.gz
+          sudo install linux-amd64/helm /usr/local/bin/helm
+      - name: Configure cluster and deploy verified SHA
+        env:
+          EKS_CLUSTER: ${{ vars.EKS_CLUSTER }}
+          ff717079ee2060e4bcee96c4779b553acc87447c_REGION: ${{ vars.ff717079ee2060e4bcee96c4779b553acc87447c_REGION }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$ff717079ee2060e4bcee96c4779b553acc87447c_REGION"
+          export IMAGE_REPOSITORY="ghcr.io/${REPOSITORY,,}"
+          export IMAGE_TAG="$GITHUB_SHA"
+          bash scripts/deploy.sh
