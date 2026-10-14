@@ -12,3 +12,10 @@ SessionLocal = sessionmaker(bind=engine)
 def get_db():
     with SessionLocal() as session:
         yield session
+
+# SQLite is only for lightweight local preview/tests; enforce the same FK cascade.
+if engine.dialect.name == 'sqlite':
+    from sqlalchemy import event
+    @event.listens_for(engine, 'connect')
+    def sqlite_foreign_keys(connection, record):
+        connection.execute('PRAGMA foreign_keys=ON')

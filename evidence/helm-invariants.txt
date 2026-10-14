@@ -1,0 +1,1 @@
+PASS: replicas, HPA, resources, probes, non-root users, services, routing, PVC, migration and monitoring selectors

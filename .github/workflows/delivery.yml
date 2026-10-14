@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-24.04
     services:
       postgres:
-        image: postgres:17.6-alpine
+        image: postgres:17.11-alpine3.24
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test-only-isolated
@@ -96,8 +96,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c
         with:
-          role-to-assume: ${{ vars.ff717079ee2060e4bcee96c4779b553acc87447c_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ vars.ff717079ee2060e4bcee96c4779b553acc87447c_REGION }}
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
       - name: Install pinned Helm
         run: |
           curl -fsSLO https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz
@@ -108,10 +108,10 @@ jobs:
       - name: Configure cluster and deploy verified SHA
         env:
           EKS_CLUSTER: ${{ vars.EKS_CLUSTER }}
-          ff717079ee2060e4bcee96c4779b553acc87447c_REGION: ${{ vars.ff717079ee2060e4bcee96c4779b553acc87447c_REGION }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$ff717079ee2060e4bcee96c4779b553acc87447c_REGION"
+          aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$AWS_REGION"
           export IMAGE_REPOSITORY="ghcr.io/${REPOSITORY,,}"
           export IMAGE_TAG="$GITHUB_SHA"
           bash scripts/deploy.sh

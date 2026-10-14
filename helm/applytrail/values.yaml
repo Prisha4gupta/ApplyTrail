@@ -11,7 +11,7 @@ backend:
     maxReplicas: 5
     targetCPU: 65
 postgres:
-  image: postgres:17.6-alpine
+  image: postgres:17.11-alpine3.24
   storage: 10Gi
   storageClass: gp3
   existingSecret: applytrail-db

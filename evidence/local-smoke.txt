@@ -1,0 +1,2 @@
+PASS: frontend, version, create, read, update, interview and dashboard
+PASS: smoke record and linked interview removed
