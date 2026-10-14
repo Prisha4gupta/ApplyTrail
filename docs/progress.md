@@ -5,3 +5,5 @@
 Phase 1 — requirements: Verified locally. Official marks match the requested matrix. The official rubric additionally names `k8s/namespace.yaml` and repository access for the instructor. ApplyTrail is an original domain rather than a copy of TaskBoard. No grade is guaranteed.
 
 Cloud provisioning requires a current regional cost estimate and explicit approval. No chargeable resources have been requested.
+
+Phase 2 — backend implemented: full application/interview CRUD, validated HTTP URLs and aware timestamps, dashboard calculations, explicit Alembic migration and database constraints. Related interviews cascade on application deletion. Liveness, readiness and bounded route-template metrics added. Python syntax compilation passed; runtime tests pending dependency installation.
