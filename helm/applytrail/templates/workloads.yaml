@@ -1,0 +1,79 @@
+{{- range $component := list "frontend" "backend" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $component }}
+spec:
+  {{- if or (eq $component "frontend") (not $.Values.backend.autoscaling.enabled) }}
+  replicas: {{ if eq $component "frontend" }}{{ $.Values.frontend.replicas }}{{ else }}{{ $.Values.backend.replicas }}{{ end }}
+  {{- end }}
+  selector:
+    matchLabels: {app: applytrail, component: {{ $component }}}
+  template:
+    metadata:
+      labels: {app: applytrail, component: {{ $component }}}
+    spec:
+      automountServiceAccountToken: false
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 101
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: {{ $component }}
+          image: "{{ $.Values.image.repository }}-{{ $component }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+            readOnlyRootFilesystem: true
+            runAsUser: {{ if eq $component "backend" }}10001{{ else }}101{{ end }}
+          ports:
+            - {name: http, containerPort: {{ if eq $component "backend" }}8000{{ else }}8080{{ end }}}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+          {{- if eq $component "backend" }}
+          envFrom:
+            - secretRef: {name: {{ $.Values.postgres.existingSecret }}}
+            - configMapRef: {name: applytrail-config}
+          {{- end }}
+          startupProbe:
+            httpGet: {path: {{ if eq $component "backend" }}/ready{{ else }}/healthz{{ end }}, port: http}
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet: {path: {{ if eq $component "backend" }}/ready{{ else }}/healthz{{ end }}, port: http}
+            periodSeconds: 5
+            timeoutSeconds: 4
+          livenessProbe:
+            httpGet: {path: {{ if eq $component "backend" }}/health{{ else }}/healthz{{ end }}, port: http}
+            periodSeconds: 10
+            timeoutSeconds: 4
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $component }}
+  labels: {app: applytrail, component: {{ $component }}}
+spec:
+  type: ClusterIP
+  selector: {app: applytrail, component: {{ $component }}}
+  ports:
+    - {name: http, port: {{ if eq $component "backend" }}8000{{ else }}8080{{ end }}, targetPort: http}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: applytrail-config
+data:
+  APP_VERSION: {{ .Values.image.tag | quote }}
