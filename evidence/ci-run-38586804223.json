@@ -1,0 +1,30 @@
+{
+  "run_url": "https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38586804223",
+  "jobs": [
+    {
+      "name": "verify",
+      "conclusion": "success",
+      "url": "https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38586804223/job/115930853267"
+    },
+    {
+      "name": "images (frontend)",
+      "conclusion": "success",
+      "url": "https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38586804223/job/115931180764"
+    },
+    {
+      "name": "compose",
+      "conclusion": "success",
+      "url": "https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38586804223/job/115931180784"
+    },
+    {
+      "name": "images (backend)",
+      "conclusion": "success",
+      "url": "https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38586804223/job/115931180861"
+    },
+    {
+      "name": "deploy",
+      "conclusion": "failure",
+      "url": "https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38586804223/job/115931907053"
+    }
+  ]
+}

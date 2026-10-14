@@ -1,0 +1,4 @@
+2026-10-14T15:11:05.6207175Z PASS: frontend, version, create, read, update, interview and dashboard
+2026-10-14T15:11:05.6207948Z PASS: smoke record and linked interview removed
+2026-10-14T15:11:08.4725848Z PASS: application survives backend/frontend container restart
+2026-10-14T15:11:08.4727187Z PASS: persistence-check record removed

@@ -1,3 +1,4 @@
+b547f76 fix(security): replace vulnerable Debian runtime and verify Compose in CI
 28856e4 fix: harden preview cascades release variables runtime pins and manifest validation
 8bd7e8e docs: add complete operations demo evidence cost and cleanup guides
 8f60daf ci: scan immutable release images deploy via OIDC and provision monitoring

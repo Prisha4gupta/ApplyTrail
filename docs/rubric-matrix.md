@@ -4,12 +4,12 @@
 
 | Criterion | Marks | Implementation | Verification command / action | Genuine evidence | Status / blocker |
 |---|---:|---|---|---|---|
-| M1: health, CRUD, PostgreSQL migration, React and responsive UI | 10 | backend/app; backend/alembic/versions/0001_initial.py; frontend/src | pytest; alembic upgrade/check; browser CRUD | pytest.txt, local-smoke.txt, dashboard screenshot | Verified locally with SQLite; PostgreSQL CI pending |
-| M2: >=5 tests, >=3 endpoints, isolation/config | 10 | backend/tests; pytest.ini | pytest -v | evidence/pytest.txt: 16 passed | Verified locally; PostgreSQL CI pending |
+| M1: health, CRUD, PostgreSQL migration, React and responsive UI | 10 | backend/app; backend/alembic/versions/0001_initial.py; frontend/src | pytest; alembic upgrade/check; browser CRUD | pytest.txt, local-smoke.txt, dashboard screenshot | Verified in CI for PostgreSQL + Compose; browser Verified locally |
+| M2: >=5 tests, >=3 endpoints, isolation/config | 10 | backend/tests; pytest.ini | pytest -v | evidence/pytest.txt: 16 passed | Verified in CI: 16 PostgreSQL tests passed |
 | M3: repository access, meaningful history, ignores | 5 | .gitignore; Git history; public GitHub repo | git log; git ls-remote | evidence/git-history.txt; https://github.com/Prisha4gupta/ApplyTrail | Verified locally: ten genuine commits pushed |
-| M4: Dockerfiles, multistage Nginx, non-root, Compose | 10 | backend/Dockerfile; frontend/Dockerfile; docker-compose.yml | docker compose up --build; ps; browser; restart | None yet | Implemented; Blocked locally by absent Docker |
-| M5: push-main tests, frontend build, both images, GHCR SHA | 15 | .github/workflows/delivery.yml; scripts/deploy.sh | actual workflow + rollout + smoke | https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38502731767 | Implemented; CI in progress at audit |
-| M6: both scans, HIGH/CRITICAL gate, explanation | 5 | delivery.yml scan step; README security guidance | inspect both Trivy JSON artifacts | Pending scan reports | Implemented; no clean-scan claim |
+| M4: Dockerfiles, multistage Nginx, non-root, Compose | 10 | backend/Dockerfile; frontend/Dockerfile; docker-compose.yml | docker compose up --build; ps; browser; restart | evidence/compose-persistence-38586804223.txt | Verified in CI: builds, Compose startup, CRUD and restart persistence passed; local Docker absent |
+| M5: push-main tests, frontend build, both images, GHCR SHA | 15 | .github/workflows/delivery.yml; scripts/deploy.sh | actual workflow + rollout + smoke | https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38586804223 | Verified in CI through both GHCR pushes; AWS deploy Blocked at missing credentials |
+| M6: both scans, HIGH/CRITICAL gate, explanation | 5 | delivery.yml scan step; README security guidance | inspect both Trivy JSON artifacts | evidence/trivy-*-38586804223.json; docs/security-results.md | Verified in CI: both scans passed after documented remediation |
 | M7: valid HCL/init/plan, VPC/two public subnets/EKS/nodes/destroy/example | 15 | terraform/ | fmt; init -backend=false; validate; approved plan/apply/destroy | terraform-init.txt; terraform-validate.txt | Verified locally for init/validate; AWS auth/approval pending |
 | M8: namespace/chart/release/two replicas/ClusterIP/Ingress/running pods | 15 | k8s/; helm/applytrail/ | helm lint/template; invariant script; actual rollout | helm-lint.txt; helm-invariants.txt | Verified locally for rendering; cluster unavailable |
 | M9: metrics endpoint/scrape/Grafana/live panels | 10 | main.py; ServiceMonitor; monitoring/ | parser test; target UP; populated panels | metrics test passes; cluster screenshots pending | Implemented; endpoint Verified locally; live monitoring Blocked |
@@ -21,18 +21,18 @@
 |---|---|---|---|
 | Exact dashboard counts and Saved-only deadlines | main.py, test_api.py | dashboard tests | Verified locally |
 | Interview CRUD, aware times, parent cascade | models.py, schemas.py, tests | interview/cascade tests | Verified locally |
-| Search/filter/sort/pagination, accessible board changes | main.py, main.tsx | filter tests; browser create/stage move | Verified locally; full mobile interaction audit pending |
+| Search/filter/sort/pagination, accessible board changes | main.py, main.tsx | filter tests; browser create/stage move | Verified locally; 390px layout verified; browser interview scheduling limitation documented |
 | Historical dates and HTTP URL validation | schemas.py, tests | historical/invalid cases | Verified locally |
 | Explicit idempotent fictional seed | app/seed.py | invoked twice, remained eight seed rows | Verified locally |
-| No automatic production table creation | Alembic migration; Docker/Helm Jobs | source inspection; alembic check | Verified locally; PostgreSQL migration execution pending CI |
+| No automatic production table creation | Alembic migration; Docker/Helm Jobs | source inspection; alembic check | Verified locally; PostgreSQL migration Verified in CI |
 | Health/readiness error behavior | main.py, tests | DB failure returns 503, health stays 200 | Verified locally |
 | Bounded metric labels | main.py, tests | dynamic IDs/unmatched paths absent | Verified locally |
 | Frontend /api routing and version | Vite/Nginx/Ingress; /api/version | local proxy smoke; deployed SHA smoke | Verified locally; container/cloud routing pending |
-| Persistent PostgreSQL and restart proof | Compose volume; StatefulSet/PVC | restart and read same record | Implemented; Docker/AWS pending |
+| Persistent PostgreSQL and restart proof | Compose volume; StatefulSet/PVC | restart and read same record | Verified in CI for Compose; AWS pending |
 | One migration per release, initial readiness | migration.yaml; Compose migrate | controlled Job and initial install | Implemented; real rollout pending |
-| Image scan/push identity and retained failures | delivery.yml | build once; same IMAGE used in scan/push | Implemented; actual images pending |
+| Image scan/push identity and retained failures | delivery.yml | build once; same IMAGE used in scan/push | Implemented; both scans/pushes Verified in CI |
 | OIDC trust and namespace permissions | Terraform IAM/access; deploy-rbac.yaml | assume role; Helm incl. ServiceMonitor | Implemented; AWS bootstrap pending |
-| GHCR private/public pulls | README | public packages or scoped imagePullSecret | Blocked pending publication/visibility |
+| GHCR private/public pulls | README | public packages or scoped imagePullSecret | Published in CI; EKS pull/visibility configuration still pending |
 | EKS API connectivity and access | api_allowed_cidrs; access entries | operator + CI API request | Blocked pending account/runner configuration |
 | EBS CSI and secure state locking | Terraform addons; storage.yaml; backend example | PVC Bound; encrypted/locked S3 state | Implemented; AWS pending |
 | Supported Ingress controller | bootstrap-cluster.sh; Traefik values | install; external routes | Implemented; cluster pending |

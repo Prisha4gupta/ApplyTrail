@@ -20,6 +20,8 @@ Reviewed 2026-10-14. Use committed locks for exact dependencies; do not replace 
 | kube-prometheus-stack | 92.3.1 | Official https://prometheus-community.github.io/helm-charts/index.yaml |
 | Trivy | 0.75.0 | Official GitHub release metadata |
 
-Image tags are version-pinned, not digest-pinned. Trivy gates both built images on every release; scan success is pending actual execution. EKS addon versions are discovered for compatibility during planning and should be copied into addon_versions after review. Chart version availability and rendered validity do not prove EKS runtime compatibility; actual installation remains pending.
+Image tags are version-pinned, not digest-pinned. Trivy gates both built images on every release; both application image scans passed in CI run 38586804223. EKS addon versions are discovered for compatibility during planning and should be copied into addon_versions after review. Chart version availability and rendered validity do not prove EKS runtime compatibility; actual installation remains pending.
 
 Official assessment sources: https://github.com/Nency-Ravaliya/devops-heros/blob/main/session21-python/README.md and GRADING.md. No student-guide.md or equivalent session-21 guide was found in the repository tree.
+
+Backend runtime remediation: Python 3.12.14 Alpine 3.24 replaced Debian Bookworm following actual Trivy findings; both scans and Compose passed in run 38586804223. See security-results.md.

@@ -4,7 +4,7 @@
 
 This is a **single-user, unauthenticated demonstration for synthetic data only**. A public demo can be read and changed by anyone. Do not enter real personal information. It is not a private multi-user service.
 
-Current audit: application and local checks implemented; AWS deployment/evidence pending. See [progress](docs/progress.md), [rubric matrix](docs/rubric-matrix.md) and [evidence](docs/evidence-checklist.md). A configuration file is not proof of a running system; no grade is guaranteed.
+Current audit: PostgreSQL tests, both image builds/security scans/GHCR pushes, and Compose CRUD/restart persistence passed in CI. AWS deployment/evidence remains blocked by account bootstrap. See [progress](docs/progress.md), [rubric matrix](docs/rubric-matrix.md) and [evidence](docs/evidence-checklist.md). A configuration file is not proof of a running system; no grade is guaranteed.
 
 ## Features
 

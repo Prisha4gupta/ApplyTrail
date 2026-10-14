@@ -1,0 +1,10 @@
+2026-10-14 — actual local browser verification (Vite + FastAPI + SQLite preview)
+PASS: Dashboard displayed eight seeded fictional applications.
+PASS: Native application dialog submitted UI CHECK — Fictional Co / Demo Intern.
+PASS: Dashboard total increased to nine and active count increased to five.
+PASS: Board dropdown moved that record from Applied to Interview; dashboard interview count became two.
+PASS: Application details displayed the persisted Interview stage.
+PASS: Desktop screenshot captured after these actions.
+PASS: 390px mobile viewport inspected; an initial hidden-label overflow was corrected.
+PASS: After correction document.scrollWidth = innerWidth = 390; mobile screenshot captured.
+LIMITATION: Automated datetime-local filling did not populate the browser field, so the interview dialog was cancelled. API interview CRUD/timezone behavior is verified by Pytest and HTTP smoke, but the complete browser scheduling interaction remains pending manual confirmation.
