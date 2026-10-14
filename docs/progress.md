@@ -7,3 +7,5 @@ Phase 1 — requirements: Verified locally. Official marks match the requested m
 Cloud provisioning requires a current regional cost estimate and explicit approval. No chargeable resources have been requested.
 
 Phase 2 — backend implemented: full application/interview CRUD, validated HTTP URLs and aware timestamps, dashboard calculations, explicit Alembic migration and database constraints. Related interviews cascade on application deletion. Liveness, readiness and bounded route-template metrics added. Python syntax compilation passed; runtime tests pending dependency installation.
+
+Phase 3 — testing: Verified locally, 16 Pytest cases pass using isolated SQLite with foreign keys enabled. CI PostgreSQL integration remains pending. Dependency versions (including transitives) frozen in requirements.txt. A Starlette warning notes its future test-client transition; no failures. No equivalent student guide found in the official repository tree. Initial system-Python compile attempt hit a cache sandbox restriction; rerun with bundled Python 3.12 passed.
