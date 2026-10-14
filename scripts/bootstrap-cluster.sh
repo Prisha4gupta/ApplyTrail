@@ -2,6 +2,7 @@
 set -euo pipefail
 # Run only after approved Terraform apply, authenticated kubeconfig, and DB/Grafana secrets.
 kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/deploy-rbac.yaml
 kubectl apply -f k8s/storage.yaml
 helm repo add traefik https://traefik.github.io/charts
 helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/

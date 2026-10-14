@@ -1,8 +1,9 @@
-FROM python:3.12.14-slim-bookworm
+FROM python:3.12.14-alpine3.24
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && useradd --uid 10001 --create-home app
+RUN apk upgrade --no-cache && pip install --no-cache-dir -r requirements.txt \
+    && addgroup -g 10001 app && adduser -D -u 10001 -G app app
 COPY --chown=10001:10001 app ./app
 COPY --chown=10001:10001 alembic ./alembic
 COPY --chown=10001:10001 alembic.ini .

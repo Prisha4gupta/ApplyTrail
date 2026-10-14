@@ -4,11 +4,11 @@ Store captures as `evidence/YYYY-MM-DD-area-description.ext`. Review for secrets
 
 | Item | Capture method | What it proves | Current status |
 |---|---|---|---|
-| App desktop/mobile | Browser screenshot after CRUD, different viewport | Rendered UI and visible data | Pending screenshot file |
+| App desktop/mobile | Browser screenshot after CRUD, different viewport | Rendered UI and visible data | evidence/2026-10-14-dashboard.png (desktop); mobile pending |
 | Pytest | `cd backend; pytest -v` | Actual isolated test outcomes | evidence/pytest.txt; Verified locally (SQLite) |
-| PostgreSQL tests | Actions verify log | Actual PostgreSQL migration/CRUD | Blocked: CI not run |
+| PostgreSQL tests | Actions verify log | Actual PostgreSQL migration/CRUD | Actual run started; results pending |
 | Frontend build | `npm ci; npm run build` | TypeScript and bundle build | evidence/frontend-build.txt; Verified locally |
-| Git history | `git log --oneline` and screenshot | At least ten real commits | Pending final capture |
+| Git history | `git log --oneline` and screenshot | At least ten real commits | evidence/git-history.txt; ten commits pushed |
 | Compose | `docker compose ps`; logs; browser | Containers healthy | Blocked: Docker unavailable |
 | Restart persistence | Create record; restart backend/frontend; GET again | DB data survives app restart | Blocked: Compose unavailable |
 | Actions | Successful run permalink | Actual pipeline gates | Pending |

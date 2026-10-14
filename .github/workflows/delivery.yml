@@ -84,9 +84,38 @@ jobs:
         run: |
           echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
           docker push "$IMAGE"
+  compose:
+    needs: verify
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Configure isolated Compose database
+        run: |
+          python3 - <<'PYCONFIG'
+          import secrets
+          password=secrets.token_hex(24)
+          with open('.env','w') as f:
+              f.write(f'POSTGRES_USER=applytrail\nPOSTGRES_DB=applytrail\nPOSTGRES_PASSWORD={password}\nDATABASE_URL=postgresql+psycopg://applytrail:{password}@postgres:5432/applytrail\n')
+          PYCONFIG
+      - name: Build and start complete stack
+        run: docker compose up --build -d --wait --wait-timeout 180
+      - name: CRUD and restart persistence
+        run: |
+          python3 scripts/smoke.py http://127.0.0.1:3000
+          python3 scripts/compose-check.py
+          docker compose ps -a
+      - name: Save sanitized container logs
+        if: always()
+        run: docker compose logs --no-color > compose-logs.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with: {name: compose-logs, path: compose-logs.txt}
+      - name: Remove disposable CI stack
+        if: always()
+        run: docker compose down -v
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: images
+    needs: [images, compose]
     runs-on: ubuntu-24.04
     environment: demo
     permissions:

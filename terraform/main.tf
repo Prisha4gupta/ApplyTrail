@@ -110,8 +110,9 @@ resource "aws_iam_role_policy" "deploy" {
   policy = jsonencode({ Version = "2012-10-17", Statement = [{ Effect = "Allow", Action = ["eks:DescribeCluster"], Resource = aws_eks_cluster.main.arn }] })
 }
 resource "aws_eks_access_entry" "deploy" {
-  cluster_name  = aws_eks_cluster.main.name
-  principal_arn = aws_iam_role.deploy.arn
+  kubernetes_groups = ["applytrail-deploy"]
+  cluster_name      = aws_eks_cluster.main.name
+  principal_arn     = aws_iam_role.deploy.arn
 }
 resource "aws_eks_access_policy_association" "deploy" {
   cluster_name  = aws_eks_cluster.main.name
