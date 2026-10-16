@@ -1,0 +1,5 @@
+NAME          	NAMESPACE     	REVISION	UPDATED                              	STATUS  	CHART                       	APP VERSION
+applytrail    	applytrail    	1       	2026-10-15 20:13:31.306508 +0800 WITA	deployed	applytrail-0.1.0            	1.0.0      
+metrics-server	kube-system   	1       	2026-10-15 20:05:11.632725 +0800 WITA	deployed	metrics-server-3.14.0       	0.9.0      
+monitoring    	monitoring    	2       	2026-10-16 12:10:09.532663 +0800 WITA	deployed	kube-prometheus-stack-92.3.1	v0.94.1    
+traefik       	ingress-system	2       	2026-10-15 20:03:50.430587 +0800 WITA	deployed	traefik-41.7.1              	v3.7.14    

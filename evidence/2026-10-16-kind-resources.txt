@@ -1,0 +1,20 @@
+NAME                            READY   STATUS    RESTARTS   AGE
+pod/backend-67d4d5ccd6-qf7nl    1/1     Running   0          16h
+pod/backend-67d4d5ccd6-ts7bb    1/1     Running   0          16h
+pod/frontend-56666f7b67-5prrb   1/1     Running   0          16h
+pod/frontend-56666f7b67-9f68n   1/1     Running   0          16h
+pod/postgres-0                  1/1     Running   0          102s
+
+NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/backend    ClusterIP   10.96.91.6     <none>        8000/TCP   16h
+service/frontend   ClusterIP   10.96.97.129   <none>        8080/TCP   16h
+service/postgres   ClusterIP   None           <none>        5432/TCP   16h
+
+NAME                                   CLASS     HOSTS   ADDRESS   PORTS   AGE
+ingress.networking.k8s.io/applytrail   traefik   *                 80      16h
+
+NAME                                    STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-postgres-0   Bound    pvc-475d838c-ebc2-4c60-b000-d5851a7a7023   2Gi        RWO            standard       <unset>                 16h
+
+NAME                                          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/backend   Deployment/backend   cpu: 4%/65%   2         5         3          16h

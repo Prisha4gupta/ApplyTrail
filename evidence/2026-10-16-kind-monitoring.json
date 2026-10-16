@@ -1,0 +1,18 @@
+{
+  "backend_targets_up": 5,
+  "grafana_dashboard": "ApplyTrail \u00b7 Application health",
+  "panel_values": {
+    "Request rate": [
+      160.1290443961218
+    ],
+    "Error rate": [
+      0.0
+    ],
+    "95th percentile latency": [
+      0.0973823178917414
+    ],
+    "Available backend replicas": [
+      5.0
+    ]
+  }
+}

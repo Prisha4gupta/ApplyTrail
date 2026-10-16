@@ -113,8 +113,65 @@ jobs:
       - name: Remove disposable CI stack
         if: always()
         run: docker compose down -v
-  deploy:
+  kubernetes-demo:
+    name: Deploy and verify Kubernetes demo
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: [images, compose]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install verified tools
+        run: |
+          mkdir -p .tools
+          curl -fsSL https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64 -o .tools/kind
+          curl -fsSL https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64.sha256sum -o .tools/kind.sha256
+          expected=$(awk '{print $1}' .tools/kind.sha256)
+          echo "$expected  .tools/kind" | sha256sum -c -
+          chmod +x .tools/kind
+          curl -fsSLO https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz
+          curl -fsSLO https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz.sha256sum
+          sha256sum -c helm-v3.19.0-linux-amd64.tar.gz.sha256sum
+          tar -xzf helm-v3.19.0-linux-amd64.tar.gz
+          cp linux-amd64/helm .tools/helm
+          curl -fsSL https://dl.k8s.io/release/v1.37.0/bin/linux/amd64/kubectl -o .tools/kubectl
+          curl -fsSL https://dl.k8s.io/release/v1.37.0/bin/linux/amd64/kubectl.sha256 -o .tools/kubectl.sha256
+          echo "$(cat .tools/kubectl.sha256)  .tools/kubectl" | sha256sum -c -
+          chmod +x .tools/kubectl
+      - name: Deploy the scanned SHA images to a disposable kind cluster
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          export IMAGE_REPOSITORY="ghcr.io/${REPOSITORY,,}"
+          export IMAGE_TAG="$GITHUB_SHA"
+          export PULL_IMAGES=true
+          bash scripts/local-cluster.sh
+      - name: Verify live monitoring
+        run: |
+          export KUBECONFIG="$PWD/.tools/kubeconfig"
+          export PATH="$PWD/.tools:$PATH"
+          python3 scripts/load.py http://127.0.0.1:8080 45 4
+          python3 scripts/verify-monitoring.py
+      - name: Capture cluster results
+        if: always()
+        run: |
+          mkdir -p cluster-results
+          kubectl --kubeconfig .tools/kubeconfig get pods,svc,ingress,pvc,hpa -A > cluster-results/resources.txt 2>&1 || true
+          kubectl --kubeconfig .tools/kubeconfig get events -A --sort-by=.lastTimestamp > cluster-results/events.txt 2>&1 || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with: {name: kubernetes-demo, path: cluster-results/}
+      - name: Delete disposable CI cluster
+        if: always()
+        run: .tools/kind delete cluster --name applytrail
+  deploy:
+    name: Deploy to configured EKS environment
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.ENABLE_EKS_DEPLOY == 'true'
     needs: [images, compose]
     runs-on: ubuntu-24.04
     environment: demo

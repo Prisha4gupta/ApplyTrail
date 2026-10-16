@@ -57,7 +57,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(applytrail_http_requests_total{namespace=\"applytrail\",status=~\"5..\"}[5m])) / clamp_min(sum(rate(applytrail_http_requests_total{namespace=\"applytrail\"}[5m])), 0.001)",
+          "expr": "(sum(rate(applytrail_http_requests_total{namespace=\"applytrail\",status=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(applytrail_http_requests_total{namespace=\"applytrail\"}[5m])), 0.001)",
           "refId": "A"
         }
       ],

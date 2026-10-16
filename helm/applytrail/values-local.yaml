@@ -1,0 +1,9 @@
+# Local kind cluster: provisioned host-path storage, no cloud load balancer.
+image:
+  repository: applytrail
+  tag: local
+postgres:
+  storageClass: standard
+  storage: 2Gi
+monitoring:
+  enabled: true

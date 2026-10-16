@@ -28,7 +28,7 @@ ApplyTrail also serves as a DevOps capstone. Alongside the application, this rep
 
 ![ApplyTrail dashboard showing fictional applications](evidence/2026-10-14-dashboard.png)
 
-*Actual local browser capture. This screenshot demonstrates the interface; it is not evidence of an AWS deployment.*
+*ApplyTrail running locally with fictional demonstration data.*
 
 ## What you can do
 
@@ -168,14 +168,14 @@ flowchart LR
     Images --> Scan[Trivy HIGH / CRITICAL gate]
     Scan --> Registry[Push the scanned images to GHCR]
     Tests --> Compose[Compose CRUD + restart persistence]
-    Registry --> Deploy[OIDC → EKS → Helm]
+    Registry --> Deploy[kind → Helm demonstration release]
     Compose --> Deploy
     Deploy --> Verify[Rollout + HTTP smoke test]
 ```
 
 Images use the full Git commit SHA as their tag. Each image is built once, scanned and then pushed; the publish step does not rebuild it. Scan artifacts are retained even when a scan fails. Deployment waits for the image and Compose jobs, and GitHub concurrency prevents overlapping releases.
 
-The workflow uses GitHub OIDC instead of committed AWS access keys. The deployment identity is limited to the target cluster and application namespace, with explicit access for ServiceMonitor resources. AWS infrastructure provisioning is a separate, approved operation; CI does not automatically run Terraform apply.
+The default deployment job creates a disposable kind cluster on the GitHub runner, pulls the exact scanned SHA images, installs the application and monitoring through Helm, and verifies routing and live metrics. The cluster is deleted after the job. It does not update a laptop installation. A separate opt-in EKS job uses GitHub OIDC and requires `ENABLE_EKS_DEPLOY=true` plus the documented environment configuration. CI does not run Terraform apply.
 
 ## Kubernetes and observability
 
@@ -183,7 +183,7 @@ The Helm chart provides two frontend replicas, a backend HPA with a minimum of t
 
 Prometheus scrapes request counters and duration histograms. Labels use route templates, methods and response statuses rather than raw application IDs or personal content. The provisioned Grafana dashboard shows request rate, server-error rate, latency and available backend replicas. Grafana uses private access through port forwarding.
 
-These configurations have been rendered and checked locally. Actual EKS operation, live monitoring, autoscaling and recovery still require cloud verification.
+For the reproducible Docker Desktop deployment, follow [Local Kubernetes](docs/local-kubernetes.md). This uses kind, local persistent storage and Traefik at `http://localhost:8080`. The same application Helm chart supports separate local and cloud storage settings.
 
 ## Current verification status
 
@@ -199,14 +199,16 @@ The recorded [CI run](https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38
 | Compose startup, CRUD and restart persistence | Passed in CI |
 | Helm rendering and Terraform validation | Passed locally |
 | Browser create/stage change and mobile layout | Verified locally; scope recorded in evidence |
-| AWS deployment | Blocked at missing AWS authentication/bootstrap |
-| Live Prometheus/Grafana, HPA, recovery and destroy | Pending actual AWS deployment/evaluation |
+| Local kind deployment: Helm, Ingress, replicas, PVC | Verified October 16; see local evidence |
+| Prometheus targets and Grafana dashboard | Live queries verified for all four panels |
+| Backend HPA | Observed scaling from 2 to 4 to 5 replicas under load |
+| PostgreSQL persistence and Service recovery | Verified through pod recreation and reversible selector failure |
 
-The full workflow is **not green end to end**: its deployment job failed at AWS authentication. An earlier backend scan also failed; both the original findings and successful remediation reports are preserved in [security results](docs/security-results.md). This repository does not claim cloud resources or evidence that have not been observed.
+The linked historical run passed build, test, scanning and publication; its EKS deployment step failed. The revised workflow adds a disposable Kubernetes deployment with live monitoring checks; its first GitHub result is pending. Original scan findings and remediation reports are preserved in [security results](docs/security-results.md). Local runtime verification is recorded in [the October 16 report](docs/local-verification.md).
 
-## Deployment, costs and cleanup
+## Deployment options and cleanup
 
-The proposed AWS demo uses Mumbai (`ap-south-1`), EKS 1.35, two `t3.medium` workers, public subnets, EBS-backed database storage and an Ingress load balancer. Public nodes avoid a NAT gateway for this short-lived demonstration; they are a deliberate cost/security tradeoff. A longer-lived production design would need stronger network isolation and further hardening.
+The optional Terraform example uses Mumbai (`ap-south-1`), EKS 1.35, two `t3.medium` workers, public subnets, EBS-backed database storage and an Ingress load balancer. Public nodes avoid a NAT gateway for this short-lived demonstration; they are a deliberate cost/security tradeoff. A longer-lived production design would need stronger network isolation and further hardening.
 
 **AWS is chargeable.** Review a current regional estimate, intended runtime and cleanup policy before approving provisioning. Do not assume student credits or free-tier coverage. The [AWS bootstrap guide](docs/aws-bootstrap.md) contains the proposal and the [cleanup guide](docs/cleanup.md) explains the teardown sequence. Do not destroy the environment before assessment and confirmation.
 
@@ -237,6 +239,7 @@ ApplyTrail/
 | [Your next steps](docs/next-steps.md) | Follow the remaining work in order, with commands and expected results |
 | [Operations reference](docs/operations.md) | Find development, configuration and runtime commands |
 | [Architecture](docs/architecture.md) | Understand the components, data flow and tradeoffs |
+| [Local Kubernetes](docs/local-kubernetes.md) | Run Helm, Ingress, monitoring and release demonstrations on Docker Desktop |
 | [AWS bootstrap](docs/aws-bootstrap.md) | Prepare account access, state, costs and runtime secrets |
 | [Troubleshooting](docs/troubleshooting.md) | Diagnose failures, practise recovery and understand rollback |
 | [Demo script](docs/demo-script.md) | Present a complete code-to-deployment demonstration |
