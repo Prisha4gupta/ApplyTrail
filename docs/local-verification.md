@@ -18,6 +18,8 @@ Runtime fixes: Traefik 41.7.1 requires `service.spec.type`; Grafana 13 required 
 
 Sanitized captures live in `evidence/2026-10-16-kind-*`. The application screenshot is a real browser capture. Prometheus values are measured at capture time and will change with traffic; replicas fall back toward two after load subsides.
 
-The new GitHub Actions Kubernetes job uses a disposable runner cluster and pulls the exact scanned SHA images. Its remote result is tracked separately from these local checks. Local verification does not claim Terraform plan/apply/destroy execution or cloud infrastructure.
+The new GitHub Actions Kubernetes job uses a disposable runner cluster and pulls the exact scanned SHA images. The [GitHub run](https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38849684438) at commit `9b400e2` completed successfully, including deployment and live monitoring checks. The optional EKS job was skipped. Local verification does not claim Terraform plan/apply/destroy execution or cloud infrastructure.
 
 For the presentation, follow [Local Kubernetes](local-kubernetes.md). Keep Docker Desktop running. Your professor cannot reach your laptop through a localhost URL from another computer; provide the repository and a recording or demonstrate on this Mac.
+
+Browser verification also confirmed four populated Grafana graphs, including the load spike and replicas increasing to five then returning to two. The percentage axis is explicitly bounded from zero to one (0–100%), and legends use readable panel names.

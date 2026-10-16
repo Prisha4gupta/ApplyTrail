@@ -204,7 +204,7 @@ The recorded [CI run](https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38
 | Backend HPA | Observed scaling from 2 to 4 to 5 replicas under load |
 | PostgreSQL persistence and Service recovery | Verified through pod recreation and reversible selector failure |
 
-The linked historical run passed build, test, scanning and publication; its EKS deployment step failed. The revised workflow adds a disposable Kubernetes deployment with live monitoring checks; its first GitHub result is pending. Original scan findings and remediation reports are preserved in [security results](docs/security-results.md). Local runtime verification is recorded in [the October 16 report](docs/local-verification.md).
+The linked historical run passed build, test, scanning and publication; its EKS deployment step failed. The revised [Kubernetes delivery run](https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38849684438) passed end to end at commit `9b400e2`, including deployment of the scanned SHA images and live monitoring verification. The optional EKS job was skipped as configured. Original scan findings and remediation reports are preserved in [security results](docs/security-results.md). Local runtime verification is recorded in [the October 16 report](docs/local-verification.md).
 
 ## Deployment options and cleanup
 

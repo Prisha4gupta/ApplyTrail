@@ -2,7 +2,7 @@
   "title": "ApplyTrail \u00b7 Application health",
   "uid": "applytrail",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "15s",
   "time": {
     "from": "now-30m",
@@ -26,7 +26,8 @@
       "targets": [
         {
           "expr": "sum(rate(applytrail_http_requests_total{namespace=\"applytrail\",route!=\"/metrics\"}[5m]))",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "Request rate"
         }
       ],
       "fieldConfig": {
@@ -58,12 +59,15 @@
       "targets": [
         {
           "expr": "(sum(rate(applytrail_http_requests_total{namespace=\"applytrail\",status=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(applytrail_http_requests_total{namespace=\"applytrail\"}[5m])), 0.001)",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "Error rate"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percentunit"
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
         }
       },
       "options": {
@@ -90,7 +94,8 @@
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum by (le) (rate(applytrail_http_request_duration_seconds_bucket{namespace=\"applytrail\",route!=\"/metrics\"}[5m])))",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "95th percentile latency"
         }
       ],
       "fieldConfig": {
@@ -122,7 +127,8 @@
       "targets": [
         {
           "expr": "kube_deployment_status_replicas_available{namespace=\"applytrail\",deployment=\"backend\"}",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "Available backend replicas"
         }
       ],
       "fieldConfig": {

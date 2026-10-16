@@ -1,5 +1,7 @@
 # Your next steps: from the current project to the capstone demo
 
+**Current route (October 16):** use [Local Kubernetes](local-kubernetes.md) for your submission demo. The local cluster, monitoring, autoscaling and recovery are verified, and the [Kubernetes CI run](https://github.com/Prisha4gupta/ApplyTrail/actions/runs/38849684438) passed. The cloud setup sections below are optional reference material, not your next action.
+
 This guide is written for Prisha's existing checkout at `/Users/prisha/Desktop/ApplyTrail`. You do **not** need to build the application again or clone a second copy. Read one numbered step, complete it, check its expected result, then continue. Stop at a failed check instead of running later commands against a broken setup.
 
 **What is already done:** application code, tests, containers, CI/security pipeline, Terraform, Helm, monitoring configuration and documentation. A recorded CI run passed PostgreSQL tests, both image builds/scans/pushes and Compose restart persistence. **What remains:** your local Docker demonstration, account-specific AWS setup, actual cloud deployment, live evidence, presentation and eventual cleanup.
