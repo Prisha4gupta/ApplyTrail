@@ -1,4 +1,4 @@
-# Kubernetes demonstration on your Mac
+# Local Kubernetes
 
 This setup runs a real Kubernetes cluster inside Docker Desktop using kind. The application is deployed through Helm with PostgreSQL persistent storage, two frontend replicas, backend autoscaling (minimum two), Traefik Ingress, Metrics Server, Prometheus and Grafana.
 
@@ -7,7 +7,7 @@ This setup runs a real Kubernetes cluster inside Docker Desktop using kind. The 
 Keep Docker Desktop running with approximately 8 GB memory available. Install kubectl, kind 0.33.0 and Helm 3.19.0. This checkout also supports the verified binaries under `.tools/` (ignored by Git).
 
 ```bash
-cd /Users/prisha/Desktop/ApplyTrail
+cd /path/to/ApplyTrail
 bash scripts/local-cluster.sh
 export KUBECONFIG="$PWD/.tools/kubeconfig"
 export PATH="$PWD/.tools:$PWD/.tools/darwin-arm64:$PATH"
@@ -55,9 +55,9 @@ Generate traffic in a third terminal:
 python3 scripts/load.py http://localhost:8080 120 16
 ```
 
-Wait for scrapes; request-rate and latency panels should populate. Watch `kubectl get hpa backend -n applytrail -w` during load. Report the actual replica behavior, rather than assuming every load run must scale up.
+Wait for scrapes; request-rate and latency panels should populate. Watch `kubectl get hpa backend -n applytrail -w` during load. The HPA scales only when measured CPU utilization exceeds its target.
 
-## Demonstrate a release
+## Update a release
 
 Use a unique image tag for each local release, so Kubernetes observes the image change:
 
@@ -67,13 +67,13 @@ IMAGE_TAG="demo-$(date +%Y%m%d%H%M%S)" bash scripts/local-cluster.sh
 
 The backend's `/api/version` reports this tag. GitHub Actions also deploys the scanned, published commit-SHA images to a disposable kind cluster and runs the smoke checks. This automated deployment runs on the GitHub runner; it does not update your laptop. The separate EKS deployment job is opt-in through repository variable `ENABLE_EKS_DEPLOY=true` and requires its documented environment configuration.
 
-## Submission walkthrough
+## Runtime checks
 
-Show the application CRUD flow, Helm releases, Ready replicas, Services, Ingress, Bound PVC, live Prometheus targets and populated Grafana panels. Show the successful GitHub run and exact SHA image tags. Use the controlled Service-selector failure and recovery procedure in `docs/troubleshooting.md`, confined to this demonstration cluster.
+Check the application CRUD flow, Helm releases, Ready replicas, Services, Ingress, Bound PVC, live Prometheus targets and populated Grafana panels. Compare release versions with the GitHub run and image tags. Use the controlled Service-selector failure and recovery procedure in `docs/troubleshooting.md`, confined to this demonstration cluster.
 
-Screenshots or a recording must capture real outputs. Identify this environment as local Kubernetes. Terraform configuration is a separate infrastructure deliverable; this setup does not execute it.
+The setup runs entirely in Docker Desktop. The optional Terraform configuration is independent of this local cluster.
 
-## Stop after evaluation
+## Stop and remove the cluster
 
 Ctrl+C stops port forwarding. Quitting Docker Desktop makes the local demonstration unavailable. To permanently delete this demo and its database, explicitly run:
 

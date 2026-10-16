@@ -1,16 +1,38 @@
-# Cleanup plan — prepared before provisioning
+# Stopping and removing environments
 
-Do not execute until evaluation is finished and the owner explicitly confirms destruction and data retention policy. Proposed policy: discard synthetic database contents after evaluation; preserve sanitized evidence. Confirm before executing.
+## Docker Compose
 
-1. Save screenshots, workflow links, current release SHA, sanitized Terraform outputs and any agreed database export. Never commit credentials, kubeconfig, raw state or binary plans.
-2. Stop load generation (Ctrl+C; all scripts are bounded). Disable scheduled/manual deployment triggers or avoid pushes during cleanup.
-3. While the controllers/nodes still work: `helm uninstall applytrail -n applytrail`; `helm uninstall traefik -n ingress-system`; `helm uninstall monitoring -n monitoring`; `helm uninstall metrics-server -n kube-system`.
-4. Wait for Service finalizers and AWS load balancers to disappear. Check `kubectl get svc -A` and `aws elbv2 describe-load-balancers --region ap-south-1`; also check classic load balancers with `aws elb describe-load-balancers`. Identify only resources belonging to this project. Do not destroy controllers while external cleanup is pending.
-5. PostgreSQL StatefulSet PVC is retained by Kubernetes. With confirmed discard policy, delete `data-postgres-0` in applytrail. The StorageClass also uses Retain: identify its exact EBS volume ID from the PV, confirm ownership, then delete the retained PV and EBS volume explicitly. Do not blanket-delete volumes.
-6. `terraform -chdir=terraform plan -destroy -out=destroy.tfplan`; review; `terraform -chdir=terraform apply destroy.tfplan`. Record sanitized successful output only after it occurs.
-7. Check for leftover EBS volumes/snapshots, load balancers, network interfaces, public IPs, CloudWatch log groups and NAT gateways. The design has no NAT, but verify the account inventory anyway. Recheck the billing console after charges settle; it is delayed.
-8. The state bucket is deliberately outside the application state. Retain encrypted state until teardown is confirmed. Delete object versions/lock files and the bucket only with separate approval and only if dedicated to this project. Do not delete an existing shared GitHub OIDC provider.
+Stop the stack while preserving its data:
 
-Local: `docker compose down` preserves data. **Destructive local reset:** `docker compose down -v` deletes the local PostgreSQL volume permanently. Never use that command merely to restart the app.
+```bash
+docker compose down
+```
 
-Status: no AWS resources created; destroy evidence pending, not simulated.
+For a deliberate fresh start, `docker compose down -v` permanently deletes the database volume. Export any records you need first.
+
+## Local Kubernetes
+
+Stop port forwarding with Ctrl+C. Quitting Docker Desktop makes the cluster temporarily unavailable. To permanently delete the ApplyTrail cluster and its database:
+
+```bash
+.tools/kind delete cluster --name applytrail
+```
+
+There is no automatic deletion schedule. GitHub Actions deletes its own disposable kind cluster at the end of each deployment job.
+
+## Optional cloud infrastructure
+
+Before removal, export needed database data and identify the exact resources owned by this installation. Avoid deploying while teardown is running.
+
+1. Uninstall the application and Ingress release while controllers and worker nodes are still available. Remove monitoring and Metrics Server when no longer needed.
+2. Wait for the Ingress load balancer and its Service finalizers to disappear. Verify through the AWS load-balancer inventory in the configured region before removing the cluster.
+3. Decide whether to retain the PostgreSQL PVC. The gp3 StorageClass uses `Retain`; deleting a claim does not automatically remove its EBS volume. Identify and explicitly handle that specific volume.
+4. Review a Terraform destroy plan, then apply only after confirming its contents:
+
+   ```bash
+   terraform -chdir=terraform plan -destroy -out=destroy.tfplan
+   terraform -chdir=terraform apply destroy.tfplan
+   ```
+
+5. Check for leftover load balancers, EBS volumes/snapshots, network interfaces, public IP addresses and log groups. Billing updates can be delayed.
+6. Keep encrypted Terraform state until teardown is confirmed. The dedicated state bucket is managed separately; remove its versions and lock objects only when no longer needed. Never delete shared infrastructure or a shared GitHub OIDC provider.

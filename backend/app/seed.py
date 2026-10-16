@@ -22,7 +22,7 @@ def seed():
             existing = db.scalar(select(Application).where(Application.company_name == company, Application.role_title == role))
             if existing:
                 continue
-            item = Application(company_name=company, role_title=role, employment_type='Internship' if 'Intern' in role else 'Full-time', work_mode=mode, stage=stage, location='Fictional demo company', applied_date=(now-timedelta(days=5+index)).date() if stage!='Saved' else None, deadline=(now+timedelta(days=index+2)).date() if stage=='Saved' else None, job_url='https://example.com/careers', notes='Fictional record for the ApplyTrail capstone demonstration.')
+            item = Application(company_name=company, role_title=role, employment_type='Internship' if 'Intern' in role else 'Full-time', work_mode=mode, stage=stage, location='Fictional demo company', applied_date=(now-timedelta(days=5+index)).date() if stage!='Saved' else None, deadline=(now+timedelta(days=index+2)).date() if stage=='Saved' else None, job_url='https://example.com/careers', notes='Fictional sample application for exploring ApplyTrail.')
             db.add(item)
             db.flush()
             if stage=='Interview':

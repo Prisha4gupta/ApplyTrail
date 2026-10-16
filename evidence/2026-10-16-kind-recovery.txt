@@ -1,7 +1,0 @@
-PASS: application record survived PostgreSQL pod recreation on its PVC
-PASS: deliberate selector mismatch produced HTTP 503
-NAME            ADDRESSTYPE   PORTS     ENDPOINTS   AGE
-backend-66vn6   IPv4          <unset>   <unset>     15h
-
-PASS: original selector restored; API and stored record recovered
-Disposable recovery record removed

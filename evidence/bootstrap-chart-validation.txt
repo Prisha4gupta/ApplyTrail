@@ -1,5 +1,0 @@
-PASS: pinned traefik chart rendered for Kubernetes 1.35: 6 resources
-PASS: pinned monitoring chart rendered for Kubernetes 1.35: 102 resources
-PASS: Prometheus release selector and cross-namespace discovery match app ServiceMonitor
-PASS: Grafana service is private ClusterIP
-PASS: pinned metrics chart rendered for Kubernetes 1.35: 9 resources

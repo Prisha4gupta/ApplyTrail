@@ -28,7 +28,7 @@ kubectl get endpointslices -n applytrail
 python3 scripts/smoke.py http://INGRESS_ADDRESS
 ```
 
-Capture before/broken/diagnosis/fixed screenshots and the exact time. Expected behavior is a temporary API failure with frontend error feedback. The exercise is **pending** until performed on the real demo cluster. A written runbook is not recovery evidence.
+Inspect endpoints and API responses before, during and after the fault. Expected behavior is a temporary API failure with frontend error feedback. For an automated local persistence and recovery check, use `KUBECONFIG="$PWD/.tools/kubeconfig" python3 scripts/verify-local-recovery.py`. It refuses to run outside `kind-applytrail`.
 
 ## Rollback
 
